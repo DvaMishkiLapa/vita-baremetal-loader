@@ -16,17 +16,39 @@ Then the payload bootstrap code (`payload_bootstrap.S`) is copied to the scratch
 Since the payload bootstrap code is now in an identity-mapped location, it can proceed to disable the MMU and copy the payload from the previously allocated physically contiguous buffer to its destination address
 (`PAYLOAD_PADDR` in `config.h`), to finally jump to it.
 
-## Instructions
+## Build
 
-**Compilation**:
+1. Make sure you have [VitaSDK](https://vitasdk.org/) installed and configured (try [vdpm](https://github.com/vitasdk/vdpm));
+2. Change the path for the `payload.bin` download if you need it (`config.h:1`);
+3. Depending on the firmware version on your PSVita, change the libraries you use (`Makefile:5-9`) ([source](https://gist.github.com/xerpi/5c60ce951caf263fcafffb48562fe50f?permalink_comment_id=4464046#gistcomment-4464046)):
 
-* [vitasdk](https://vitasdk.org/) is needed.
+   If you have firmware version **< 3.63** (*not verified, because I do not have such firmware*):
 
-**Installation**:
+   ```makefile
+   LIBS =	-ltaihenForKernel_stub -lSceSysclibForDriver_stub -lSceSysmemForDriver_stub \
+	-lSceSysmemForKernel_stub -lSceThreadmgrForDriver_stub -lSceCpuForKernel_stub \
+	-lSceCpuForDriver_stub -lSceUartForKernel_stub -lScePervasiveForDriver_stub \
+	-lSceSysconForDriver_stub -lScePowerForDriver_stub -lSceIofilemgrForDriver_stub \
+	-lSceSysrootForKernel_stub
+   ```
 
-1. Copy your payload to your PSVita (default path is `ux0:/baremetal/payload.bin`)
-2. Copy `baremetal-loader.skprx` to your PSVita
-3. Load the plugin
+    If you have firmware version **>= 3.63**:
+
+   ```makefile
+   LIBS =	-ltaihenForKernel_stub -lSceSysclibForDriver_stub -lSceSysmemForDriver_stub \
+	-lSceSysmemForKernel_363_stub -lSceThreadmgrForDriver_stub -lSceCpuForKernel_363_stub \
+	-lSceCpuForDriver_stub -lSceUartForKernel_363_stub -lScePervasiveForDriver_stub \
+	-lSceSysconForDriver_stub -lScePowerForDriver_stub -lSceIofilemgrForDriver_stub \
+	-lSceSysrootForKernel_stub
+   ```
+
+4. Build the project with the following commands: `make`.
+
+## Installation
+
+1. Copy your payload to your PSVita (default path is `ux0:linux/payload.bin`);
+2. Copy `baremetal-loader.skprx` to your PSVita;
+3. Load the plugin.
 
 ## Example bare-metal payload
 
@@ -34,4 +56,12 @@ Check [vita-baremetal-sample](https://github.com/xerpi/vita-baremetal-sample) as
 
 ## Credits
 
-Thanks to everybody who contributes to [wiki.henkaku.xyz](https://wiki.henkaku.xyz/) and helps reverse engineering the PSVita OS.
+Thanks to everybody, who contributed to the launch of the Linux kernel on PS Vita:
+
+- [xerpi](https://github.com/xerpi);
+- [Team Molecule](https://twitter.com/teammolecule) (formed by [Davee](https://twitter.com/DaveeFTW), Proxima, [xyz](https://twitter.com/pomfpomfpomf3), and [YifanLu](https://twitter.com/yifanlu));
+- [TheFloW](https://twitter.com/theflow0)
+- [motoharu](https://github.com/motoharu-gosuto)
+- everybody at the [HENkaku](https://discord.gg/m7MwpKA) Discord channel;
+- everybody who contributes to [wiki.henkaku.xyz](https://wiki.henkaku.xyz/) and helps reverse engineering the PSVita OS;
+- [CreepNT](https://github.com/CreepNT) for improvements to this app.
